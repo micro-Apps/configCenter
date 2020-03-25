@@ -20,11 +20,8 @@ const plugins: IPlugin[] = [
         hmr: true,
       },
       locale: {
-        // default false
         enable: true,
-        // default zh-CN
         default: 'zh-CN',
-        // default true, when it is true, will use `navigator.language` overwrite default
         baseNavigator: true,
       },
       dynamicImport: {
@@ -32,19 +29,7 @@ const plugins: IPlugin[] = [
         webpackChunkName: true,
         level: 3,
       },
-      pwa: pwa
-        ? {
-            workboxPluginMode: 'InjectManifest',
-            workboxOptions: {
-              importWorkboxFrom: 'local',
-            },
-          }
-        : false, // default close dll, because issue https://github.com/ant-design/ant-design-pro/issues/4665
-      // dll features https://webpack.js.org/plugins/dll-plugin/
-      // dll: {
-      //   include: ['dva', 'dva/router', 'dva/saga', 'dva/fetch'],
-      //   exclude: ['@babel/runtime', 'netlify-lambda'],
-      // },
+      pwa: false,
     },
   ],
   [
@@ -81,7 +66,6 @@ export default {
   targets: {
     ie: 11,
   },
-  // umi routes: https://umijs.org/zh/guide/router.html
   routes: [
     {
       path: '/user',
@@ -108,36 +92,26 @@ export default {
               redirect: '/dashboardworkplace',
             },
             {
-              name: '工作台',
-              icon: 'smile',
+              name: 'dashboard',
+              icon: 'PieChartOutlined',
               path: '/dashboardworkplace',
               component: './DashboardWorkplace',
             },
             {
-              path: '/admin',
-              name: '用户管理',
-              icon: 'crown',
-              component: './Admin',
-              authority: ['admin'],
-              routes: [
-                {
-                  path: '/admin/sub-page',
-                  name: 'sub-page',
-                  icon: 'smile',
-                  component: './DashboardWorkplace',
-                  authority: ['admin'],
-                },
-              ],
+              name: 'user.mange',
+              icon: 'UserOutlined',
+              path: '/user-management',
+              component: './UserManagement',
             },
             {
-              name: 'list.table-list',
+              name: 'business',
               icon: 'table',
-              path: '/list',
-              component: './ListTableList',
+              path: '/business',
+              component: './Business',
             },
             {
-              name: '模块管理',
-              icon: 'smile',
+              name: 'module',
+              icon: 'TagsOutlined',
               path: '/module',
               component: './Module',
             },

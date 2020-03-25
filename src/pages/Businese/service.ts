@@ -1,5 +1,5 @@
-import request from '@/utils/request';
-import { TableListParams, TableListItem } from './data.d';
+import request from './node_modules/@/utils/request';
+import { TableListParams, TableListItem } from './data';
 
 export async function queryRule(params?: TableListParams) {
   return request('/api/rule', {
