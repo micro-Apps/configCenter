@@ -77,39 +77,6 @@ export default {
       address: 'Sidney No. 1 Lake Park',
     },
   ],
-  'POST /api/login/account': (req: Request, res: Response) => {
-    const { password, userName, type } = req.body;
-    if (password === 'ant.design' && userName === 'admin') {
-      res.send({
-        status: 'ok',
-        type,
-        currentAuthority: 'admin',
-      });
-      return;
-    }
-    if (password === 'ant.design' && userName === 'user') {
-      res.send({
-        status: 'ok',
-        type,
-        currentAuthority: 'user',
-      });
-      return;
-    }
-    if (type === 'mobile') {
-      res.send({
-        status: 'ok',
-        type,
-        currentAuthority: 'admin',
-      });
-      return;
-    }
-
-    res.send({
-      status: 'error',
-      type,
-      currentAuthority: 'guest',
-    });
-  },
   'POST /api/register': (req: Request, res: Response) => {
     res.send({ status: 'ok', currentAuthority: 'user' });
   },
@@ -147,6 +114,88 @@ export default {
       error: 'Unauthorized',
       message: 'Unauthorized',
       path: '/base/category/list',
+    });
+  },
+  'POST /auth/login': (req: Request, res: Response) => {
+    const { password, username, type } = req.body;
+    if (password === 'ligenbb' && username === 'ADMIN') {
+      res.send({
+        "code": "101",
+        "message": "请求成功",
+        "data": {
+          "userId": "5e69feb49f4e442e76c67089",
+          "username": "Genluo",
+          "role": "ADMIN",
+          "business": [],
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZTY5ZmViNDlmNGU0NDJlNzZjNjcwODkiLCJ1c2VybmFtZSI6Ikdlbmx1byIsInJvbGUiOiJBRE1JTiIsImJ1c2luZXNzIjpbXSwiaWF0IjoxNTg1MTk1MTE5LCJleHAiOjE1ODUxOTg3MTl9.Fc3g4I06vu_aHefAm639V9nJQv9hmqoBNT7AyeCl6ZM"
+        }
+      });
+      return;
+    }
+
+    if (password === 'ligenbb' && username === 'USER') {
+      res.send({
+        "code": "101",
+        "message": "请求成功",
+        "data": {
+          "userId": "5e69feb49f4e442e76c67089",
+          "username": "Genluo",
+          "role": "USER",
+          "business": [],
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZTY5ZmViNDlmNGU0NDJlNzZjNjcwODkiLCJ1c2VybmFtZSI6Ikdlbmx1byIsInJvbGUiOiJBRE1JTiIsImJ1c2luZXNzIjpbXSwiaWF0IjoxNTg1MTk1MTE5LCJleHAiOjE1ODUxOTg3MTl9.Fc3g4I06vu_aHefAm639V9nJQv9hmqoBNT7AyeCl6ZM"
+        }
+      });
+      return;
+    }
+
+
+    if (password === 'ligenbb' && username === 'DEVELOPMENT') {
+      res.send({
+        "code": "101",
+        "message": "请求成功",
+        "data": {
+          "userId": "5e69feb49f4e442e76c67089",
+          "username": "Genluo",
+          "role": "DEVELOPMENT",
+          "business": [],
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZTY5ZmViNDlmNGU0NDJlNzZjNjcwODkiLCJ1c2VybmFtZSI6Ikdlbmx1byIsInJvbGUiOiJBRE1JTiIsImJ1c2luZXNzIjpbXSwiaWF0IjoxNTg1MTk1MTE5LCJleHAiOjE1ODUxOTg3MTl9.Fc3g4I06vu_aHefAm639V9nJQv9hmqoBNT7AyeCl6ZM"
+        }
+      });
+      return;
+    }
+
+    if (password === 'ligenbb' && username === "OPERATION") {
+      res.send({
+        "code": "101",
+        "message": "请求成功",
+        "data": {
+          "userId": "5e69feb49f4e442e76c67089",
+          "username": "Genluo",
+          "role": "OPERATION",
+          "business": [],
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZTY5ZmViNDlmNGU0NDJlNzZjNjcwODkiLCJ1c2VybmFtZSI6Ikdlbmx1byIsInJvbGUiOiJBRE1JTiIsImJ1c2luZXNzIjpbXSwiaWF0IjoxNTg1MTk1MTE5LCJleHAiOjE1ODUxOTg3MTl9.Fc3g4I06vu_aHefAm639V9nJQv9hmqoBNT7AyeCl6ZM"
+        }
+      })
+    }
+
+    if (password === 'ligenbb' && username === "BUSINESS") {
+      res.send({
+        "code": "101",
+        "message": "请求成功",
+        "data": {
+          "userId": "5e69feb49f4e442e76c67089",
+          "username": "Genluo",
+          "role": "BUSINESS",
+          "business": [],
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI1ZTY5ZmViNDlmNGU0NDJlNzZjNjcwODkiLCJ1c2VybmFtZSI6Ikdlbmx1byIsInJvbGUiOiJBRE1JTiIsImJ1c2luZXNzIjpbXSwiaWF0IjoxNTg1MTk1MTE5LCJleHAiOjE1ODUxOTg3MTl9.Fc3g4I06vu_aHefAm639V9nJQv9hmqoBNT7AyeCl6ZM"
+        }
+      })
+    }
+
+    res.send({
+      status: 'error',
+      type,
+      currentAuthority: 'guest',
     });
   },
 

@@ -30,3 +30,20 @@ export function setAuthority(authority: string | string[]): void {
   // auto reload
   reloadAuthorized();
 }
+
+export interface UserInfo {
+  userId: string;
+  username: string;
+  role: string;
+  business: string[];
+  token: string;
+};
+
+export function setUserInfo(data: UserInfo): void {
+  localStorage.setItem('userInfo', JSON.stringify(data));
+}
+
+export function getUserInfo(): UserInfo {
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || "{}") as UserInfo;
+  return userInfo;
+}

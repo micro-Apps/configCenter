@@ -42,6 +42,7 @@ const Login: React.FC<LoginProps> = props => {
       payload: { ...values, type },
     });
   };
+
   return (
     <div className={styles.main}>
       <LoginFrom activeKey={type} onTabChange={setType} onSubmit={handleSubmit}>
@@ -51,8 +52,8 @@ const Login: React.FC<LoginProps> = props => {
           )}
 
           <UserName
-            name="userName"
-            placeholder="用户名: admin or user"
+            name="username"
+            placeholder="用户名"
             rules={[
               {
                 required: true,
@@ -62,7 +63,7 @@ const Login: React.FC<LoginProps> = props => {
           />
           <Password
             name="password"
-            placeholder="密码: ant.design"
+            placeholder="密码"
             rules={[
               {
                 required: true,

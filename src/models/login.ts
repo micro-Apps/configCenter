@@ -4,7 +4,7 @@ import { stringify } from 'querystring';
 import { router } from 'umi';
 
 import { fakeAccountLogin } from '@/services/login';
-import { setAuthority } from '@/utils/authority';
+import { setAuthority, UserInfo, setUserInfo } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 
 export interface StateType {
@@ -37,10 +37,9 @@ const Model: LoginModelType = {
       const response = yield call(fakeAccountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
-        payload: response,
+        payload: response.data || {},
       });
-      // Login successfully
-      if (response.status === 'ok') {
+      if (response.code === '101') {
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
         let { redirect } = params as { redirect: string };
@@ -59,10 +58,8 @@ const Model: LoginModelType = {
         router.replace(redirect || '/');
       }
     },
-
     logout() {
       const { redirect } = getPageQuery();
-      // Note: There may be security issues, please note
       if (window.location.pathname !== '/user/login' && !redirect) {
         router.replace({
           pathname: '/user/login',
@@ -73,14 +70,15 @@ const Model: LoginModelType = {
       }
     },
   },
-
   reducers: {
     changeLoginStatus(state, { payload }) {
-      setAuthority(payload.currentAuthority);
+      setAuthority(payload.role);
+      setUserInfo(payload);
       return {
         ...state,
-        status: payload.status,
-        type: payload.type,
+        status: 'ok',
+        type: 'mobile',
+        currentAuthority: payload.role,
       };
     },
   },
