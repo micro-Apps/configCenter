@@ -7,11 +7,11 @@ import { connect } from 'dva';
 import { find } from 'lodash';
 import { AnyAction } from 'redux';
 import { ConnectState } from '@/models/connect';
+import { BusinessRole } from '@/models/userManage';
 import { TableListItem } from './data.d';
-import { fetchUserList } from './service';
+import { fetchUserList, findBusinessAllRole, findBusinessUserRole, changeUserBusinessRole } from './service';
 import ChangeUserRole, { ChangeUserRoleProps } from './components/ChangeUserRole';
 import ChangeUserBusinessAndBusinessRole, { BusinessAndBusinessRoleProps } from './components/ChangeUserBusinessAndBusinessRole';
-import { BusinessRole } from '@/models/userManage';
 
 
 const mapStateToProps = ({ userManage, loading }: ConnectState) => ({
@@ -34,8 +34,24 @@ const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) =>  ({
       payload: data,
     })
   },
-  currentUserBusinessList() {
-
+  fetchAllBusiness() {
+    dispatch({
+      type: 'userManage/fetchAllBusiness',
+    })
+  },
+  fetchCurrentUserBusinessList(userId: string) {
+    dispatch({
+      type: 'userManage/queryCurrentUserBusiness',
+      payload: {
+        userId
+      }
+    })
+  },
+  userAddBusiness(data: { userId: string, businessId: string}) {
+    dispatch({
+      type: 'userManage/addBusinessUser',
+      payload: data,
+    })
   }
 });
 
@@ -93,37 +109,53 @@ function useChangeUserRole(props: TableListProps): UseChangeUserRole {
   }
 };
 
+
 interface UserChangeUserBusinessRole extends BusinessAndBusinessRoleProps {
   handleClickUser(record: TableListItem): void;
 }
+
 function useChangeUserBusinessRole(props: TableListProps): UserChangeUserBusinessRole {
   const [visible, setVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<TableListItem>();
+  useEffect(() => {props.fetchAllBusiness()}, [])
 
   const handleClickUser = (record: TableListItem) => {
-    setVisible(true);
     setCurrentUser(record);
+    props.fetchCurrentUserBusinessList(record.id);
+    setVisible(true);
   }
   const handleCancel = () => setVisible(false);
 
-  const getUserBusinessRole = (businessId: string): Promise<BusinessRole[]> => {
+  const getUserBusinessRole = async (businessId: string): Promise<BusinessRole[]> => {
+    const { id = '' } = currentUser || {};
+    const response = await findBusinessUserRole({ userId: id, businessId });
+    return response.data.data;
   };
 
-  const getBusinessAllRole = (businessId: string): Promise<BusinessRole[]> => {
+  const getBusinessAllRole = async (businessId: string): Promise<BusinessRole[]> => {
+    const response = await findBusinessAllRole(businessId);
+    return response.data.data;
   }
 
   const addBusiness = (businessId: string) => {
+    const { id = '' } = currentUser || {};
+    props.userAddBusiness({ userId: id, businessId });
   }
 
   const addBusinessRole = ({businessId, businessRoleId}: {businessId: string, businessRoleId: string}) => {
+    const { id = '' } = currentUser || {};
+    changeUserBusinessRole({
+      userId: id,
+      businessId,
+      businessRoleIds: [ businessRoleId ],
+      status: 'add',
+    })
   }
-
-
 
   return {
     visible,
     allBusinessList: props.allBusinessList,
-    currentUserBusinessList: props.currentUserBusinessList,
+    currentUserBusinessList: props.currentUserBusinessList || [],
     getUserBusinessRole,
     getBusinessAllRole,
     addBusiness,
@@ -197,9 +229,7 @@ const TableList: React.FC<TableListProps> = props => {
           selectedRows && selectedRows.length > 0 && (
             <Dropdown
               overlay={
-                <Menu
-                  selectedKeys={[]}
-                >
+                <Menu selectedKeys={[]}>
                   <Menu.Item key="remove">批量分配业务</Menu.Item>
                 </Menu>
               }
@@ -220,16 +250,19 @@ const TableList: React.FC<TableListProps> = props => {
         roleList={roleList}
         loading={loading}
       />
-      <ChangeUserBusinessAndBusinessRole
-        visible={changeUserBusinessAndBusinessRoleVisible}
-        allBusinessList={allBusinessList}
-        currentUserBusinessList={currentUserBusinessList}
-        getUserBusinessRole={getUserBusinessRole}
-        addBusiness={addBusiness}
-        addBusinessRole={addBusinessRole}
-        handleCancel={handleChangeBusinessRoleCancel}
-        getBusinessAllRole={getBusinessAllRole}
-      />
+      {
+        currentUserBusinessList && currentUserBusinessList.length && changeUserBusinessAndBusinessRoleVisible && (
+          <ChangeUserBusinessAndBusinessRole
+            allBusinessList={allBusinessList}
+            currentUserBusinessList={currentUserBusinessList}
+            getUserBusinessRole={getUserBusinessRole}
+            addBusiness={addBusiness}
+            addBusinessRole={addBusinessRole}
+            handleCancel={handleChangeBusinessRoleCancel}
+            getBusinessAllRole={getBusinessAllRole}
+          />
+        )
+      }
     </PageHeaderWrapper>
   );
 };

@@ -1,41 +1,5 @@
 import request from '@/utils/request';
-import { TableListParams, FetchUserList } from './data.d';
-
-export async function queryRule(params?: TableListParams) {
-  return request('/api/rule', {
-    params,
-  });
-}
-
-export async function removeRule(params: { key: number[] }) {
-  return request('/api/rule', {
-    method: 'POST',
-    data: {
-      ...params,
-      method: 'delete',
-    },
-  });
-}
-
-export async function addRule(params: TableListParams) {
-  return request('/api/rule', {
-    method: 'POST',
-    data: {
-      ...params,
-      method: 'post',
-    },
-  });
-}
-
-export async function updateRule(params: TableListParams) {
-  return request('/api/rule', {
-    method: 'POST',
-    data: {
-      ...params,
-      method: 'update',
-    },
-  });
-}
+import { FetchUserList } from './data.d';
 
 export async function fetchUserList(params?: FetchUserList) {
   return request('/user/userList', {
@@ -43,5 +7,38 @@ export async function fetchUserList(params?: FetchUserList) {
     data: {
       ...params,
     }
+  })
+}
+
+interface FindUserBusinessRoleDto {
+  userId: string;
+  businessId: string;
+}
+
+export async function findBusinessUserRole(params:FindUserBusinessRoleDto) {
+  return request('/user/findBusinessUserRole', {
+    method: 'POST',
+    data: params,
+  })
+}
+export async function findBusinessAllRole(businessId: string) {
+  return request('/business/getBusinessRole', {
+    method: 'POST',
+    data: {
+      businessId 
+    }
+  })
+}
+
+interface ChangeUserBusinessRoleDto {
+  userId: string;
+  businessId: string;
+  businessRoleIds: string[];
+  status: string;
+}
+export async function changeUserBusinessRole(param: ChangeUserBusinessRoleDto) {
+  return request('/user/changeUserBusinessRole', {
+    method: 'POST',
+    data: param,
   })
 }

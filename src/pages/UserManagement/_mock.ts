@@ -81,8 +81,78 @@ function changeUserRole(req: Request, res: Response) {
   })
 };
 
+function fetchBusinessList(req: Request, res: Response) {
+  return res.json({
+    "code": "101",
+    "message": "请求成功",
+    "data": {
+      "count": 4,
+      "data": [
+        {
+          id: Math.random(),
+          name: '测试业务'
+        },
+        {
+          "id": "5e69fccd5c059de53b2f79e3",
+          "name": "ceshi",
+          "logo": "ceshi",
+        },
+        {
+          "id": "5e69fcf75c059de53b2f79fe",
+          "name": "ceshi",
+          "logo": "ceshi",
+        },
+        {
+          "id": "5e69fd0c5c059de53b2f7a16",
+          "name": "ceshi",
+          "logo": "ceshi",
+        },
+        {
+          "id": "5e69fd1a5c059de53b2f7a1d",
+          "name": "ceshi",
+          "logo": "ceshi",
+        }
+      ]
+    }
+  })
+}
+
+function fetchBusinessRoleList(req: Request, res: Response) {
+  return res.json({
+    "code": "101",
+    "message": "请求成功",
+    "data": {
+      "count": 4,
+      "data": [
+        {
+          "id": "5e69fccd5c059de53b2f79e3",
+          "name": "ceshi",
+        },
+        {
+          "id": "5e69fcf75c059de53b2f79fe",
+          "name": "ceshi",
+        },
+        {
+          "id": "5e69fd0c5c059de53b2f7a16",
+          "name": "ceshi",
+        },
+        {
+          "id": "5e69fd1a5c059de53b2f7a1d",
+          "name": "ceshi",
+        }
+      ]
+    }
+  })
+}
+
 export default {
   'POST /user/userList': fetchUserList,
   'GET /role/list': fetchRoleList,
   'POST /user/changeUserRole': changeUserRole,
+  'GET /business/list': fetchBusinessList,
+  'POST /user/findUserBusiness': fetchBusinessList,
+  'POST /user/businessAddUser': changeUserRole,
+  'POST /business/getBusinessRole': fetchBusinessRoleList,
+  'POST /user/changeUserBusinessRole': fetchBusinessRoleList,
+  'POST /user/findBusinessUserRole': fetchBusinessRoleList,
 };

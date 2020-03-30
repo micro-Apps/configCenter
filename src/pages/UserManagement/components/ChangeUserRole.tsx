@@ -4,7 +4,7 @@ import { Modal, Tag } from 'antd';
 
 export interface ChangeUserRoleProps {
   visible: boolean;
-  roleList: {name: string, id: string}[];
+  roleList?: {name: string, id: string}[];
   roleId: string;
   handleSubmit: () => void;
   handleCancel: () => void;
@@ -46,7 +46,7 @@ const ChangeUserRole: React.FC<ChangeUserRoleProps> = props => {
       confirmLoading={loading}
     >
       {
-        roleList.map(currentRole => (
+        (roleList || []).map(currentRole => (
           <RoleItem
             key={currentRole.id}
             name={currentRole.name}

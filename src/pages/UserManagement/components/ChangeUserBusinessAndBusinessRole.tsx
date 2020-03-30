@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
 import { BusinessRole, Business } from '@/models/userManage';
-import { Row, Col, Modal, Tag } from 'antd';
+import { Row, Col, Modal, Tag, Card, message } from 'antd';
+import { find } from 'lodash';
 
 interface TagContainerProps {
-  data: { name: string, id: string, checked?: boolean }[];
+  title: string;
+  data?: { name: string, id: string, checked?: boolean }[];
   onClick: (id: string) => void;
   onAdd: () => void;
 }
-
 const TagContainer:React.FC<TagContainerProps> = props => {
-  const { data, onClick, onAdd  } = props;
-  const tagList: React.ReactNode[] = data.map(tag => {
-    const handleClick = () => onClick(tag.id);
-    return <Tag onClick={handleClick}>{tag.name}</Tag>;
+  const { data, onClick, onAdd, title  } = props;
+  const tagList: React.ReactNode[] = (data || []).map(tag => {
+    const handleClick = () => !tag.checked && onClick(tag.id);
+    return <Tag onClick={handleClick} key={tag.id}>{tag.name}</Tag>;
   });
-  tagList.push((<Tag onClick={onAdd}>新增</Tag>));
+  tagList.push((<Tag onClick={onAdd} key="add">新增</Tag>));
   return (
     <React.Fragment>
-      {tagList}
+      <Card title={title}>
+        {tagList}
+      </Card>
     </React.Fragment>
   )
 }
@@ -42,8 +45,8 @@ const OperationModal: React.FC<OperationModalModalProps> = props => {
       {
         data.map(item => {
           const { id, name, checked } = item;
-          const handleClick = () => onClick(id);
-          return <Tag onClick={handleClick} color={checked ? 'red' : undefined}>{name}</Tag>
+          const handleClick = () => !checked && onClick(id);
+          return <Tag key={id} onClick={handleClick} color={checked ? 'red' : undefined}>{name}</Tag>
         })
       }
     </Modal>
@@ -51,8 +54,7 @@ const OperationModal: React.FC<OperationModalModalProps> = props => {
 }
 
 export interface BusinessAndBusinessRoleProps {
-  visible: boolean;
-  allBusinessList: Business[];
+  allBusinessList?: Business[];
   currentUserBusinessList: Business[];
   getUserBusinessRole: (businessId: string) => Promise<BusinessRole[]>; // 获取用户在此业务的角色
   getBusinessAllRole: (businessId: string) => Promise<BusinessRole[]>;
@@ -70,7 +72,7 @@ enum ModalType {
 function useModal() {
   const [type, setType] = useState<ModalType>(ModalType.normal);
   const clickBusinessModal = () => setType(ModalType.business);
-  const clickBusinessRoleModal = () => setType(ModalType.normal);
+  const clickBusinessRoleModal = () => setType(ModalType.businessRole);
   const clickNormalModal = () => setType(ModalType.normal);
   return {modalType: type, clickBusinessModal, clickBusinessRoleModal, clickNormalModal}
 }
@@ -83,8 +85,14 @@ function useOperationModal(props: BusinessAndBusinessRoleProps) {
     clickNormalModal,
   } = useModal();
 
-  const { getUserBusinessRole, currentUserBusinessList: businessList, allBusinessList, getBusinessAllRole, addBusiness, addBusinessRole } = props;
-  const [currentUserBusinessList, setCurrentUserBusinessList] = useState(businessList);
+  const {
+    getUserBusinessRole,
+    currentUserBusinessList,
+    allBusinessList,
+    getBusinessAllRole,
+    addBusiness,
+    addBusinessRole,
+  } = props;
   const [currentUserBusinessRoleList, setCurrentBusinessRole] = useState<BusinessRole[]>();
   const [currentBusinessId, setCurrentBusinessId] = useState<string>();
   const [operationData, setOperationData] = useState<{name: string, id: string, checked?: boolean}[]>();
@@ -93,16 +101,12 @@ function useOperationModal(props: BusinessAndBusinessRoleProps) {
     const businessRole = await getUserBusinessRole(id);
     setCurrentBusinessRole(businessRole);
     setCurrentBusinessId(id);
-    setCurrentUserBusinessList(currentUserBusinessList.map(business => ({
-      ...business,
-      checked: id === business.id,
-    })));
   };
 
   const handleAddBusiness = () => {
     clickBusinessModal();
     const allCheckedBusinessId = currentUserBusinessList.map(business=> business.id);
-    setOperationData(allBusinessList.map(business => ({
+    setOperationData((allBusinessList || []).map(business => ({
       ...business,
       checked: allCheckedBusinessId.includes(business.id),
     })));
@@ -120,10 +124,23 @@ function useOperationModal(props: BusinessAndBusinessRoleProps) {
 
   const handleClickOperationItem = (id: string) => {
     switch(modalType) {
-      case ModalType.business: addBusiness(id);break;
-      case ModalType.businessRole: addBusinessRole({ businessId: currentBusinessId as string, businessRoleId: id }); break;
+      case ModalType.business: {
+        addBusiness(id);
+        break;
+      }
+      case ModalType.businessRole: {
+        addBusinessRole({ businessId: currentBusinessId as string, businessRoleId: id });
+        const newBusinessRole = find(operationData, { id }) as BusinessRole;
+        setCurrentBusinessRole(all => [...(all || []), newBusinessRole]);
+        break;
+      }
       default : break;
     }
+    setOperationData((operationData || []).map(operation => ({
+      ...operation,
+      checked: operation.id === id || operation.checked,
+    })));
+    message.success('添加成功');
   }
 
   const handleClickOperationCancel = () => {
@@ -146,7 +163,6 @@ function useOperationModal(props: BusinessAndBusinessRoleProps) {
 
 const BusinessAndBusinessRole: React.FC<BusinessAndBusinessRoleProps> = props => {
   const { 
-    visible,
     handleCancel,
   } = props;
 
@@ -162,8 +178,6 @@ const BusinessAndBusinessRole: React.FC<BusinessAndBusinessRoleProps> = props =>
     handleClickOperationItem,
   } = useOperationModal(props);
 
-  if (!visible) return (<React.Fragment/>)
-
   return (
     <React.Fragment>
       <Modal
@@ -171,10 +185,12 @@ const BusinessAndBusinessRole: React.FC<BusinessAndBusinessRoleProps> = props =>
         onCancel={handleCancel}
         onOk={handleCancel}
         visible={modalType === ModalType.normal}
+        destroyOnClose
       >
         <Row>
-          <Col span={24}>
+          <Col span={currentUserBusinessRoleList ? 12 : 24}>
             <TagContainer
+              title="业务"
               data={currentUserBusinessList}
               onClick={handleClickBusiness}
               onAdd={handleAddBusiness}
@@ -182,8 +198,9 @@ const BusinessAndBusinessRole: React.FC<BusinessAndBusinessRoleProps> = props =>
           </Col>
           {
             currentUserBusinessRoleList && (
-              <Col span={24}>
+              <Col span={12}>
                 <TagContainer
+                  title="业务角色"
                   data={currentUserBusinessRoleList}
                   onClick={() => {}}
                   onAdd={handleAddBusinessRole}
