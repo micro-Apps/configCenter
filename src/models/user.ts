@@ -1,7 +1,7 @@
 import { Effect } from 'dva';
 import { Reducer } from 'redux';
 
-import { queryCurrent, query as queryUsers } from '@/services/user';
+import { query as queryUsers } from '@/services/user';
 
 export interface CurrentUser {
   avatar?: string;
@@ -50,7 +50,16 @@ const UserModel: UserModelType = {
       });
     },
     *fetchCurrent(_, { call, put }) {
-      const response = yield call(queryCurrent);
+      // const response = yield call(queryCurrent);
+      const response = {
+        name: 'Serati Ma',
+        avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+        userid: '00000001',
+        email: 'antdesign@alipay.com',
+        signature: '海纳百川，有容乃大',
+        title: '交互专家',
+        group: '蚂蚁金服－某某某事业群－某某平台部－某某技术部－UED',
+      };
       yield put({
         type: 'saveCurrentUser',
         payload: response,

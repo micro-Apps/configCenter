@@ -1,129 +1,187 @@
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Divider, Dropdown, Menu, message } from 'antd';
-import React, { useState, useRef } from 'react';
+import { DownOutlined } from '@ant-design/icons';
+import { Button, Divider, Dropdown, Menu } from 'antd';
+import React, { useRef, Dispatch, useState, useEffect } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import CreateForm from './components/CreateForm';
-import UpdateForm, { FormValueType } from './components/UpdateForm';
+import { connect } from 'dva';
+import { find } from 'lodash';
+import { AnyAction } from 'redux';
+import { ConnectState } from '@/models/connect';
 import { TableListItem } from './data.d';
-import { queryRule, updateRule, addRule, removeRule } from './service';
+import { fetchUserList } from './service';
+import ChangeUserRole, { ChangeUserRoleProps } from './components/ChangeUserRole';
+import ChangeUserBusinessAndBusinessRole, { BusinessAndBusinessRoleProps } from './components/ChangeUserBusinessAndBusinessRole';
+import { BusinessRole } from '@/models/userManage';
 
-/**
- * 添加节点
- * @param fields
- */
-const handleAdd = async (fields: FormValueType) => {
-  const hide = message.loading('正在添加');
-  try {
-    await addRule({
-      desc: fields.desc,
+
+const mapStateToProps = ({ userManage, loading }: ConnectState) => ({
+  roleList: userManage.roleList,
+  allBusinessList: userManage.allBusinessList,
+  currentUserBusinessList: userManage.currentBusinessList,
+  loadingRoleList: loading.effects['userMange/fetchRoleList'],
+  loadingChangeRole: loading.effects['userManage/changeUserRole'],
+});
+
+const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) =>  ({
+  fetchRoleList: () => {
+    dispatch({
+      type: 'userManage/fetchRoleList',
     });
-    hide();
-    message.success('添加成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('添加失败请重试！');
-    return false;
+  },
+  changeUserRole: (data: { userId: string, roleId: string }) => {
+    dispatch({
+      type: 'userManage/changeUserRole',
+      payload: data,
+    })
+  },
+  currentUserBusinessList() {
+
+  }
+});
+
+type TableListProps = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
+
+interface UseChangeUserRole extends ChangeUserRoleProps {
+  onClickChangeUserRole: (record: TableListItem) => void;
+}
+
+function useChangeUserRole(props: TableListProps): UseChangeUserRole {
+  useEffect(() => {props.fetchRoleList()}, []);
+  const [visible, changeVisible] = useState(false);
+  const [roleInfo, setRoleInfo] = useState<{id: string, record: TableListItem}>();
+
+  const onClickChangeUserRole = (record: TableListItem) => {
+    const { role } = record;
+    const id = find(props.roleList, { name: role })?.id || '';
+    setRoleInfo({
+      id,
+      record,
+    });
+    changeVisible(true);
+  }
+
+  const handleCancel = () => {
+    changeVisible(false);
+  }
+
+  const handleSubmit = async () => {
+    if (!roleInfo) { changeVisible(false); return};
+    const { record, id } = roleInfo;
+    props.changeUserRole({
+      userId: record.id,
+      roleId: id,
+    })
+    changeVisible(false);
+  }
+
+  const handleChangeRoleId = (id: string) => {
+    setRoleInfo({
+      id,
+      record: (roleInfo?.record as TableListItem),
+    })
+  }
+
+  return {
+    visible,
+    roleId: roleInfo?.id || '',
+    roleList: props.roleList,
+    handleCancel,
+    handleSubmit,
+    handleChangeRoleId,
+    onClickChangeUserRole,
+    loading: !!props.loadingRoleList,
   }
 };
 
-/**
- * 更新节点
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('正在配置');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
+interface UserChangeUserBusinessRole extends BusinessAndBusinessRoleProps {
+  handleClickUser(record: TableListItem): void;
+}
+function useChangeUserBusinessRole(props: TableListProps): UserChangeUserBusinessRole {
+  const [visible, setVisible] = useState(false);
+  const [currentUser, setCurrentUser] = useState<TableListItem>();
 
-    message.success('配置成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('配置失败请重试！');
-    return false;
+  const handleClickUser = (record: TableListItem) => {
+    setVisible(true);
+    setCurrentUser(record);
   }
-};
+  const handleCancel = () => setVisible(false);
 
-/**
- *  删除节点
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: TableListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map(row => row.key),
-    });
-    hide();
-    message.success('删除成功，即将刷新');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('删除失败，请重试');
-    return false;
+  const getUserBusinessRole = (businessId: string): Promise<BusinessRole[]> => {
+  };
+
+  const getBusinessAllRole = (businessId: string): Promise<BusinessRole[]> => {
   }
-};
 
-const TableList: React.FC<{}> = () => {
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
-  const [stepFormValues, setStepFormValues] = useState({});
+  const addBusiness = (businessId: string) => {
+  }
+
+  const addBusinessRole = ({businessId, businessRoleId}: {businessId: string, businessRoleId: string}) => {
+  }
+
+
+
+  return {
+    visible,
+    allBusinessList: props.allBusinessList,
+    currentUserBusinessList: props.currentUserBusinessList,
+    getUserBusinessRole,
+    getBusinessAllRole,
+    addBusiness,
+    addBusinessRole,
+    handleCancel,
+    handleClickUser,
+  }
+}
+
+const TableList: React.FC<TableListProps> = props => {
   const actionRef = useRef<ActionType>();
+  const {
+    visible,
+    roleId,
+    roleList,
+    handleCancel,
+    handleSubmit,
+    onClickChangeUserRole,
+    handleChangeRoleId,
+    loading,
+  } = useChangeUserRole(props);
+
+  const {
+    visible: changeUserBusinessAndBusinessRoleVisible,
+    allBusinessList,
+    currentUserBusinessList,
+    getUserBusinessRole,
+    addBusiness,
+    addBusinessRole,
+    handleCancel: handleChangeBusinessRoleCancel,
+    handleClickUser,
+    getBusinessAllRole,
+  } = useChangeUserBusinessRole(props);
+
   const columns: ProColumns<TableListItem>[] = [
     {
-      title: '规则名称',
-      dataIndex: 'name',
+      title: '用户名称',
+      dataIndex: 'username',
     },
     {
-      title: '描述',
-      dataIndex: 'desc',
-    },
-    {
-      title: '服务调用次数',
-      dataIndex: 'callNo',
+      title: '系统角色',
+      dataIndex: 'role',
+      hideInSearch: true,
       sorter: true,
-      renderText: (val: string) => `${val} 万`,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      valueEnum: {
-        0: { text: '关闭', status: 'Default' },
-        1: { text: '运行中', status: 'Processing' },
-        2: { text: '已上线', status: 'Success' },
-        3: { text: '异常', status: 'Error' },
-      },
-    },
-    {
-      title: '上次调度时间',
-      dataIndex: 'updatedAt',
-      sorter: true,
-      valueType: 'dateTime',
+      renderText: (val: string) => `${val}`,
     },
     {
       title: '操作',
       dataIndex: 'option',
+      hideInSearch: true,
       valueType: 'option',
       render: (_, record) => (
         <>
-          <a
-            onClick={() => {
-              handleUpdateModalVisible(true);
-              setStepFormValues(record);
-            }}
-          >
-            配置
+          <a onClick={() => onClickChangeUserRole(record)}>
+            修改系统角色
           </a>
           <Divider type="vertical" />
-          <a href="">订阅警报</a>
+          <a onClick={() => handleClickUser(record)}>设置业务角色</a>
         </>
       ),
     },
@@ -132,83 +190,49 @@ const TableList: React.FC<{}> = () => {
   return (
     <PageHeaderWrapper>
       <ProTable<TableListItem>
-        headerTitle="查询表格"
+        headerTitle="用户列表"
         actionRef={actionRef}
         rowKey="key"
         toolBarRender={(action, { selectedRows }) => [
-          <Button icon={<PlusOutlined />} type="primary" onClick={() => handleModalVisible(true)}>
-            新建
-          </Button>,
           selectedRows && selectedRows.length > 0 && (
             <Dropdown
               overlay={
                 <Menu
-                  onClick={async e => {
-                    if (e.key === 'remove') {
-                      await handleRemove(selectedRows);
-                      action.reload();
-                    }
-                  }}
                   selectedKeys={[]}
                 >
-                  <Menu.Item key="remove">批量删除</Menu.Item>
-                  <Menu.Item key="approval">批量审批</Menu.Item>
+                  <Menu.Item key="remove">批量分配业务</Menu.Item>
                 </Menu>
               }
             >
-              <Button>
-                批量操作 <DownOutlined />
-              </Button>
+              <Button>批量操作<DownOutlined /></Button>
             </Dropdown>
           ),
         ]}
-        tableAlertRender={(selectedRowKeys, selectedRows) => (
-          <div>
-            已选择 <a style={{ fontWeight: 600 }}>{selectedRowKeys.length}</a> 项&nbsp;&nbsp;
-            <span>
-              服务调用次数总计 {selectedRows.reduce((pre, item) => pre + item.callNo, 0)} 万
-            </span>
-          </div>
-        )}
-        request={params => queryRule(params)}
+        request={params => fetchUserList(params)}
         columns={columns}
-        rowSelection={{}}
       />
-      <CreateForm
-        onSubmit={async value => {
-          const success = await handleAdd(value);
-          if (success) {
-            handleModalVisible(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-        onCancel={() => handleModalVisible(false)}
-        modalVisible={createModalVisible}
+      <ChangeUserRole
+        visible={visible}
+        handleCancel={handleCancel}
+        handleSubmit={handleSubmit}
+        roleId={roleId}
+        handleChangeRoleId={handleChangeRoleId}
+        roleList={roleList}
+        loading={loading}
       />
-      {stepFormValues && Object.keys(stepFormValues).length ? (
-        <UpdateForm
-          onSubmit={async value => {
-            const success = await handleUpdate(value);
-            if (success) {
-              handleModalVisible(false);
-              setStepFormValues({});
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
-            }
-          }}
-          onCancel={() => {
-            handleUpdateModalVisible(false);
-            setStepFormValues({});
-          }}
-          updateModalVisible={updateModalVisible}
-          values={stepFormValues}
-        />
-      ) : null}
+      <ChangeUserBusinessAndBusinessRole
+        visible={changeUserBusinessAndBusinessRoleVisible}
+        allBusinessList={allBusinessList}
+        currentUserBusinessList={currentUserBusinessList}
+        getUserBusinessRole={getUserBusinessRole}
+        addBusiness={addBusiness}
+        addBusinessRole={addBusinessRole}
+        handleCancel={handleChangeBusinessRoleCancel}
+        getBusinessAllRole={getBusinessAllRole}
+      />
     </PageHeaderWrapper>
   );
 };
 
-export default TableList;
+
+export default connect(mapStateToProps, mapDispatchToProps)(TableList)

@@ -1,71 +1,34 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Request, Response } from 'express';
 import { parse } from 'url';
-import { TableListItem, TableListParams } from './data.d';
+import { TableListItem, RoleType, FetchUserList } from './data.d';
 
 // mock tableListDataSource
-let tableListDataSource: TableListItem[] = [];
+const tableListDataSource: TableListItem[] = [];
+
 
 for (let i = 0; i < 10; i += 1) {
   tableListDataSource.push({
+    id: '234234',
     key: i,
-    disabled: i % 6 === 0,
-    href: 'https://ant.design',
-    avatar: [
-      'https://gw.alipayobjects.com/zos/rmsportal/eeHMaZBwmTvLdIwMfBpg.png',
-      'https://gw.alipayobjects.com/zos/rmsportal/udxAbMEhpwthVVcjLXik.png',
-    ][i % 2],
-    name: `TradeCode ${i}`,
-    title: `一个任务名称 ${i}`,
-    owner: '曲丽丽',
-    desc: '这是一段描述',
-    callNo: Math.floor(Math.random() * 1000),
-    status: Math.floor(Math.random() * 10) % 4,
-    updatedAt: new Date(`2017-07-${Math.floor(i / 2) + 1}`),
-    createdAt: new Date(`2017-07-${Math.floor(i / 2) + 1}`),
-    progress: Math.ceil(Math.random() * 100),
+    username: `TradeCode ${i}`,
+    role: RoleType.ADMIN,
   });
 }
 
-function getRule(req: Request, res: Response, u: string) {
+function fetchUserList(req: Request, res: Response, u: string) {
   let url = u;
   if (!url || Object.prototype.toString.call(url) !== '[object String]') {
     // eslint-disable-next-line prefer-destructuring
     url = req.url;
   }
 
-  const params = (parse(url, true).query as unknown) as TableListParams;
+  const params = (parse(url, true).query as unknown) as FetchUserList;
 
   let dataSource = tableListDataSource;
 
-  if (params.sorter) {
-    const s = params.sorter.split('_');
-    dataSource = dataSource.sort((prev, next) => {
-      if (s[1] === 'descend') {
-        return next[s[0]] - prev[s[0]];
-      }
-      return prev[s[0]] - next[s[0]];
-    });
-  }
-
-  if (params.status) {
-    const status = params.status.split(',');
-    let filterDataSource: TableListItem[] = [];
-    status.forEach((s: string) => {
-      filterDataSource = filterDataSource.concat(
-        dataSource.filter(item => {
-          if (parseInt(`${item.status}`, 10) === parseInt(s.split('')[0], 10)) {
-            return true;
-          }
-          return false;
-        }),
-      );
-    });
-    dataSource = filterDataSource;
-  }
-
-  if (params.name) {
-    dataSource = dataSource.filter(data => data.name.includes(params.name || ''));
+  if (params.username) {
+    dataSource = dataSource.filter(data => data.username.includes(params.username || ''));
   }
 
   let pageSize = 10;
@@ -75,7 +38,7 @@ function getRule(req: Request, res: Response, u: string) {
 
   const result = {
     data: dataSource,
-    total: dataSource.length,
+    total: dataSource.length*10,
     success: true,
     pageSize,
     current: parseInt(`${params.currentPage}`, 10) || 1,
@@ -84,64 +47,42 @@ function getRule(req: Request, res: Response, u: string) {
   return res.json(result);
 }
 
-function postRule(req: Request, res: Response, u: string, b: Request) {
-  let url = u;
-  if (!url || Object.prototype.toString.call(url) !== '[object String]') {
-    // eslint-disable-next-line prefer-destructuring
-    url = req.url;
-  }
-
-  const body = (b && b.body) || req.body;
-  const { method, name, desc, key } = body;
-
-  switch (method) {
-    /* eslint no-case-declarations:0 */
-    case 'delete':
-      tableListDataSource = tableListDataSource.filter(item => key.indexOf(item.key) === -1);
-      break;
-    case 'post':
-      const i = Math.ceil(Math.random() * 10000);
-      tableListDataSource.unshift({
-        key: i,
-        href: 'https://ant.design',
-        avatar: [
-          'https://gw.alipayobjects.com/zos/rmsportal/eeHMaZBwmTvLdIwMfBpg.png',
-          'https://gw.alipayobjects.com/zos/rmsportal/udxAbMEhpwthVVcjLXik.png',
-        ][i % 2],
-        name: `TradeCode ${i}`,
-        title: `一个任务名称 ${i}`,
-        owner: '曲丽丽',
-        desc,
-        callNo: Math.floor(Math.random() * 1000),
-        status: Math.floor(Math.random() * 10) % 2,
-        updatedAt: new Date(),
-        createdAt: new Date(),
-        progress: Math.ceil(Math.random() * 100),
-      });
-      break;
-    case 'update':
-      tableListDataSource = tableListDataSource.map(item => {
-        if (item.key === key) {
-          return { ...item, desc, name };
+function fetchRoleList(req: Request, res: Response) {
+  return res.json({
+    "code": "101",
+    "message": "请求成功",
+    "data": {
+      "count": 4,
+      "data": [
+        {
+          "id": "5e69fccd5c059de53b2f79e3",
+          "name": "USER"
+        },
+        {
+          "id": "5e69fcf75c059de53b2f79fe",
+          "name": "ADMIN"
+        },
+        {
+          "id": "5e69fd0c5c059de53b2f7a16",
+          "name": "DEVELOPMENT"
+        },
+        {
+          "id": "5e69fd1a5c059de53b2f7a1d",
+          "name": "OPERATION"
         }
-        return item;
-      });
-      break;
-    default:
-      break;
-  }
-
-  const result = {
-    list: tableListDataSource,
-    pagination: {
-      total: tableListDataSource.length,
-    },
-  };
-
-  return res.json(result);
+      ]
+    }
+  })
 }
 
+function changeUserRole(req: Request, res: Response) {
+  return res.json({
+    code: '101',
+  })
+};
+
 export default {
-  'GET /api/rule': getRule,
-  'POST /api/rule': postRule,
+  'POST /user/userList': fetchUserList,
+  'GET /role/list': fetchRoleList,
+  'POST /user/changeUserRole': changeUserRole,
 };

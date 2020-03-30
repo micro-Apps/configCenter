@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { TableListParams } from './data.d';
+import { TableListParams, FetchUserList } from './data.d';
 
 export async function queryRule(params?: TableListParams) {
   return request('/api/rule', {
@@ -35,4 +35,13 @@ export async function updateRule(params: TableListParams) {
       method: 'update',
     },
   });
+}
+
+export async function fetchUserList(params?: FetchUserList) {
+  return request('/user/userList', {
+    method: 'POST',
+    data: {
+      ...params,
+    }
+  })
 }

@@ -1,17 +1,17 @@
+export enum RoleType {
+  USER = 'USER', // 普通用户权限，没有被管理员分配权限，接口限制
+  ADMIN = 'ADMIN', // 超级管理员
+  DEVELOPMENT = 'DEVELOPMENT', // 开发模块的同学
+  OPERATION = 'OPERATION', // 运营人员
+  BUSINESS = 'BUSINESS', // 业务方运营同学
+}
+
 export interface TableListItem {
   key: number;
+  id: string;
   disabled?: boolean;
-  href: string;
-  avatar: string;
-  name: string;
-  title: string;
-  owner: string;
-  desc: string;
-  callNo: number;
-  status: number;
-  updatedAt: Date;
-  createdAt: Date;
-  progress: number;
+  username: string;
+  role: RoleType;
 }
 
 export interface TableListPagination {
@@ -33,4 +33,12 @@ export interface TableListParams {
   key?: number;
   pageSize?: number;
   currentPage?: number;
+}
+
+export interface FetchUserList {
+  pageSize?: number;
+  current?: number;
+  username?: string,
+  businessId?: number;
+  currentPage?: string;
 }

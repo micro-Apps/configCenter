@@ -80,7 +80,7 @@ const TableList: React.FC<{}> = () => {
   const actionRef = useRef<ActionType>();
   const columns: ProColumns<TableListItem>[] = [
     {
-      title: '规则名称',
+      title: '名称',
       dataIndex: 'name',
       rules: [
         {
@@ -90,12 +90,12 @@ const TableList: React.FC<{}> = () => {
       ],
     },
     {
-      title: '描述',
+      title: '业务ID',
       dataIndex: 'desc',
       valueType: 'textarea',
     },
     {
-      title: '服务调用次数',
+      title: '系统角色',
       dataIndex: 'callNo',
       sorter: true,
       hideInForm: true,

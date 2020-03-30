@@ -89,13 +89,7 @@ export default {
           routes: [
             {
               path: '/',
-              redirect: '/dashboardworkplace',
-            },
-            {
-              name: 'dashboard',
-              icon: 'PieChartOutlined',
-              path: '/dashboardworkplace',
-              component: './DashboardWorkplace',
+              redirect: '/user-management',
             },
             {
               name: 'user.mange',
