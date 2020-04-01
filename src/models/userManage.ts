@@ -1,8 +1,13 @@
-import { Effect } from "dva";
-import { fetchRoleList, changeUserRole, fetchAllBusinessList, queryCurrentUserBusiness,userAddBusiness } from "@/services/userMange";
+import { Effect } from 'dva';
+import {
+  fetchRoleList,
+  changeUserRole,
+  fetchAllBusinessList,
+  queryCurrentUserBusiness,
+  userAddBusiness,
+} from '@/services/userMange';
 import { Reducer } from 'redux';
 import { find } from 'lodash';
-
 
 export interface Role {
   name: string;
@@ -21,9 +26,9 @@ export interface BusinessRole {
 }
 
 export interface UserManageModelState {
-  roleList?: Role[],
-  allBusinessList?: Business[],
-  currentBusinessList?: Business[],
+  roleList?: Role[];
+  allBusinessList?: Business[];
+  currentBusinessList?: Business[];
 }
 
 export interface UserManageModelType {
@@ -33,8 +38,8 @@ export interface UserManageModelType {
     fetchRoleList: Effect;
     changeUserRole: Effect;
     fetchAllBusiness: Effect;
-    queryCurrentUserBusiness: Effect,
-    addBusinessUser: Effect,
+    queryCurrentUserBusiness: Effect;
+    addBusinessUser: Effect;
   };
   reducers: {
     saveOptions: Reducer<UserManageModelState>;
@@ -57,9 +62,9 @@ const UserManage: UserManageModelType = {
       yield put({
         type: 'saveOptions',
         payload: {
-          roleList: allRoleList.data.data
+          roleList: allRoleList.data.data,
         },
-      })
+      });
     },
 
     *changeUserRole({ payload }, { call }) {
@@ -71,9 +76,9 @@ const UserManage: UserManageModelType = {
       yield put({
         type: 'saveOptions',
         payload: {
-          allBusinessList: allBusiness.data.data,
-        }
-      })
+          allBusinessList: allBusiness.data,
+        },
+      });
     },
 
     *queryCurrentUserBusiness({ payload }, { call, put }) {
@@ -81,9 +86,9 @@ const UserManage: UserManageModelType = {
       yield put({
         type: 'saveOptions',
         payload: {
-          currentBusinessList: userBusiness.data.data
-        }
-      })
+          currentBusinessList: userBusiness.data.data,
+        },
+      });
     },
 
     *addBusinessUser({ payload }, { call, put }) {
@@ -92,9 +97,9 @@ const UserManage: UserManageModelType = {
         type: 'addCurrentBusinessById',
         payload: {
           businessId: payload.businessId,
-        }
-      })
-    }
+        },
+      });
+    },
   },
 
   reducers: {
@@ -102,7 +107,7 @@ const UserManage: UserManageModelType = {
       return {
         ...state,
         ...action.payload,
-      }
+      };
     },
     addCurrentBusinessById(state, action) {
       const { businessId } = action.payload;
@@ -111,8 +116,8 @@ const UserManage: UserManageModelType = {
       return {
         ...state,
         currentBusinessList: newCurrentBusinessList,
-      }
-    }
+      };
+    },
   },
 };
 export default UserManage;

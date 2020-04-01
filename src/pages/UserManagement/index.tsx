@@ -9,10 +9,16 @@ import { AnyAction } from 'redux';
 import { ConnectState } from '@/models/connect';
 import { BusinessRole } from '@/models/userManage';
 import { TableListItem } from './data.d';
-import { fetchUserList, findBusinessAllRole, findBusinessUserRole, changeUserBusinessRole } from './service';
+import {
+  fetchUserList,
+  findBusinessAllRole,
+  findBusinessUserRole,
+  changeUserBusinessRole,
+} from './service';
 import ChangeUserRole, { ChangeUserRoleProps } from './components/ChangeUserRole';
-import ChangeUserBusinessAndBusinessRole, { BusinessAndBusinessRoleProps } from './components/ChangeUserBusinessAndBusinessRole';
-
+import ChangeUserBusinessAndBusinessRole, {
+  BusinessAndBusinessRoleProps,
+} from './components/ChangeUserBusinessAndBusinessRole';
 
 const mapStateToProps = ({ userManage, loading }: ConnectState) => ({
   roleList: userManage.roleList,
@@ -22,37 +28,37 @@ const mapStateToProps = ({ userManage, loading }: ConnectState) => ({
   loadingChangeRole: loading.effects['userManage/changeUserRole'],
 });
 
-const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) =>  ({
+const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) => ({
   fetchRoleList: () => {
     dispatch({
       type: 'userManage/fetchRoleList',
     });
   },
-  changeUserRole: (data: { userId: string, roleId: string }) => {
+  changeUserRole: (data: { userId: string; roleId: string }) => {
     dispatch({
       type: 'userManage/changeUserRole',
       payload: data,
-    })
+    });
   },
   fetchAllBusiness() {
     dispatch({
       type: 'userManage/fetchAllBusiness',
-    })
+    });
   },
   fetchCurrentUserBusinessList(userId: string) {
     dispatch({
       type: 'userManage/queryCurrentUserBusiness',
       payload: {
-        userId
-      }
-    })
+        userId,
+      },
+    });
   },
-  userAddBusiness(data: { userId: string, businessId: string}) {
+  userAddBusiness(data: { userId: string; businessId: string }) {
     dispatch({
       type: 'userManage/addBusinessUser',
       payload: data,
-    })
-  }
+    });
+  },
 });
 
 type TableListProps = ReturnType<typeof mapStateToProps> & ReturnType<typeof mapDispatchToProps>;
@@ -62,9 +68,11 @@ interface UseChangeUserRole extends ChangeUserRoleProps {
 }
 
 function useChangeUserRole(props: TableListProps): UseChangeUserRole {
-  useEffect(() => {props.fetchRoleList()}, []);
+  useEffect(() => {
+    props.fetchRoleList();
+  }, []);
   const [visible, changeVisible] = useState(false);
-  const [roleInfo, setRoleInfo] = useState<{id: string, record: TableListItem}>();
+  const [roleInfo, setRoleInfo] = useState<{ id: string; record: TableListItem }>();
 
   const onClickChangeUserRole = (record: TableListItem) => {
     const { role } = record;
@@ -74,28 +82,31 @@ function useChangeUserRole(props: TableListProps): UseChangeUserRole {
       record,
     });
     changeVisible(true);
-  }
+  };
 
   const handleCancel = () => {
     changeVisible(false);
-  }
+  };
 
   const handleSubmit = async () => {
-    if (!roleInfo) { changeVisible(false); return};
+    if (!roleInfo) {
+      changeVisible(false);
+      return;
+    }
     const { record, id } = roleInfo;
     props.changeUserRole({
       userId: record.id,
       roleId: id,
-    })
+    });
     changeVisible(false);
-  }
+  };
 
   const handleChangeRoleId = (id: string) => {
     setRoleInfo({
       id,
-      record: (roleInfo?.record as TableListItem),
-    })
-  }
+      record: roleInfo?.record as TableListItem,
+    });
+  };
 
   return {
     visible,
@@ -106,24 +117,26 @@ function useChangeUserRole(props: TableListProps): UseChangeUserRole {
     handleChangeRoleId,
     onClickChangeUserRole,
     loading: !!props.loadingRoleList,
-  }
-};
-
+  };
+}
 
 interface UserChangeUserBusinessRole extends BusinessAndBusinessRoleProps {
+  visible: boolean;
   handleClickUser(record: TableListItem): void;
 }
 
 function useChangeUserBusinessRole(props: TableListProps): UserChangeUserBusinessRole {
   const [visible, setVisible] = useState(false);
   const [currentUser, setCurrentUser] = useState<TableListItem>();
-  useEffect(() => {props.fetchAllBusiness()}, [])
+  useEffect(() => {
+    props.fetchAllBusiness();
+  }, []);
 
   const handleClickUser = (record: TableListItem) => {
     setCurrentUser(record);
     props.fetchCurrentUserBusinessList(record.id);
     setVisible(true);
-  }
+  };
   const handleCancel = () => setVisible(false);
 
   const getUserBusinessRole = async (businessId: string): Promise<BusinessRole[]> => {
@@ -134,23 +147,29 @@ function useChangeUserBusinessRole(props: TableListProps): UserChangeUserBusines
 
   const getBusinessAllRole = async (businessId: string): Promise<BusinessRole[]> => {
     const response = await findBusinessAllRole(businessId);
-    return response.data.data;
-  }
+    return response.data;
+  };
 
   const addBusiness = (businessId: string) => {
     const { id = '' } = currentUser || {};
     props.userAddBusiness({ userId: id, businessId });
-  }
+  };
 
-  const addBusinessRole = ({businessId, businessRoleId}: {businessId: string, businessRoleId: string}) => {
+  const addBusinessRole = ({
+    businessId,
+    businessRoleId,
+  }: {
+    businessId: string;
+    businessRoleId: string;
+  }) => {
     const { id = '' } = currentUser || {};
     changeUserBusinessRole({
       userId: id,
       businessId,
-      businessRoleIds: [ businessRoleId ],
+      businessRoleIds: [businessRoleId],
       status: 'add',
-    })
-  }
+    });
+  };
 
   return {
     visible,
@@ -162,7 +181,7 @@ function useChangeUserBusinessRole(props: TableListProps): UserChangeUserBusines
     addBusinessRole,
     handleCancel,
     handleClickUser,
-  }
+  };
 }
 
 const TableList: React.FC<TableListProps> = props => {
@@ -209,9 +228,7 @@ const TableList: React.FC<TableListProps> = props => {
       valueType: 'option',
       render: (_, record) => (
         <>
-          <a onClick={() => onClickChangeUserRole(record)}>
-            修改系统角色
-          </a>
+          <a onClick={() => onClickChangeUserRole(record)}>修改系统角色</a>
           <Divider type="vertical" />
           <a onClick={() => handleClickUser(record)}>设置业务角色</a>
         </>
@@ -234,7 +251,10 @@ const TableList: React.FC<TableListProps> = props => {
                 </Menu>
               }
             >
-              <Button>批量操作<DownOutlined /></Button>
+              <Button>
+                批量操作
+                <DownOutlined />
+              </Button>
             </Dropdown>
           ),
         ]}
@@ -250,22 +270,23 @@ const TableList: React.FC<TableListProps> = props => {
         roleList={roleList}
         loading={loading}
       />
-      {
-        currentUserBusinessList && currentUserBusinessList.length && changeUserBusinessAndBusinessRoleVisible && (
-          <ChangeUserBusinessAndBusinessRole
-            allBusinessList={allBusinessList}
-            currentUserBusinessList={currentUserBusinessList}
-            getUserBusinessRole={getUserBusinessRole}
-            addBusiness={addBusiness}
-            addBusinessRole={addBusinessRole}
-            handleCancel={handleChangeBusinessRoleCancel}
-            getBusinessAllRole={getBusinessAllRole}
-          />
-        )
-      }
+      {currentUserBusinessList &&
+      currentUserBusinessList.length &&
+      changeUserBusinessAndBusinessRoleVisible ? (
+        <ChangeUserBusinessAndBusinessRole
+          allBusinessList={allBusinessList}
+          currentUserBusinessList={currentUserBusinessList}
+          getUserBusinessRole={getUserBusinessRole}
+          addBusiness={addBusiness}
+          addBusinessRole={addBusinessRole}
+          handleCancel={handleChangeBusinessRoleCancel}
+          getBusinessAllRole={getBusinessAllRole}
+        />
+      ) : (
+        ''
+      )}
     </PageHeaderWrapper>
   );
 };
 
-
-export default connect(mapStateToProps, mapDispatchToProps)(TableList)
+export default connect(mapStateToProps, mapDispatchToProps)(TableList);

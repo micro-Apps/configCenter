@@ -4,6 +4,7 @@ import { formatMessage } from 'umi-plugin-react/locale';
 import defaultSettings from '../config/defaultSettings';
 
 const { pwa } = defaultSettings;
+
 // if pwa is true
 if (pwa) {
   // Notify user if offline now
@@ -11,7 +12,6 @@ if (pwa) {
     message.warning(formatMessage({ id: 'app.pwa.offline' }));
   });
 
-  // TODO: 执行函数
   // Pop up a prompt on the page asking the user if they want to use the latest version
   window.addEventListener('sw.updated', (event: Event) => {
     const e = event as CustomEvent;

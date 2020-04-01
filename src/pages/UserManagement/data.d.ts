@@ -36,9 +36,8 @@ export interface TableListParams {
 }
 
 export interface FetchUserList {
-  pageSize?: number;
   current?: number;
-  username?: string,
+  pageSize?: number;
+  username?: string;
   businessId?: number;
-  currentPage?: string;
 }
