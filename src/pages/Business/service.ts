@@ -1,38 +1,18 @@
 import request from '@/utils/request';
-import { TableListParams, TableListItem } from './data';
+import { BusinessItemType } from './data';
 
-export async function queryRule(params?: TableListParams) {
-  return request('/api/rule', {
+export async function queryFakeList(params: { count: number }) {
+  return request('/api/fake_list', {
     params,
   });
 }
 
-export async function removeRule(params: { key: number[] }) {
-  return request('/api/rule', {
-    method: 'POST',
-    data: {
-      ...params,
-      method: 'delete',
-    },
-  });
+export async function queryBusinessList() {
+  return request('/api/business/list');
 }
-
-export async function addRule(params: TableListItem) {
-  return request('/api/rule', {
+export async function addBusiness(params: BusinessItemType) {
+  return request('/api/business/create', {
     method: 'POST',
-    data: {
-      ...params,
-      method: 'post',
-    },
-  });
-}
-
-export async function updateRule(params: TableListParams) {
-  return request('/api/rule', {
-    method: 'POST',
-    data: {
-      ...params,
-      method: 'update',
-    },
+    data: params,
   });
 }

@@ -1,238 +1,194 @@
-import { DownOutlined, PlusOutlined } from '@ant-design/icons';
-import { Button, Divider, Dropdown, Menu, message } from 'antd';
-import React, { useState, useRef } from 'react';
+import { PlusOutlined } from '@ant-design/icons';
+import { Button, Card, List, Typography, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+
+import { Dispatch } from 'redux';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
-import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
-import { SorterResult } from 'antd/es/table/interface';
+import { connect, routerRedux } from 'dva';
+import { StateType } from './model';
+import { BusinessItemType } from './data.d';
+import styles from './style.less';
+import BusinessModule from './components/BusinessModal';
 
-import CreateForm from './components/CreateForm';
-import UpdateForm, { FormValueType } from './components/UpdateForm';
-import { TableListItem } from './data';
-import { queryRule, updateRule, addRule, removeRule } from './service';
+const { Paragraph } = Typography;
 
-/**
- * 添加节点
- * @param fields
- */
-const handleAdd = async (fields: TableListItem) => {
-  const hide = message.loading('正在添加');
-  try {
-    await addRule({ ...fields });
-    hide();
-    message.success('添加成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('添加失败请重试！');
-    return false;
-  }
-};
+interface BusinessProps {
+  business: StateType;
+  dispatch: Dispatch<any>;
+  loading: boolean;
+}
 
-/**
- * 更新节点
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('正在配置');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
-
-    message.success('配置成功');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('配置失败请重试！');
-    return false;
-  }
-};
-
-/**
- *  删除节点
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: TableListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map(row => row.key),
-    });
-    hide();
-    message.success('删除成功，即将刷新');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('删除失败，请重试');
-    return false;
-  }
-};
-
-const TableList: React.FC<{}> = () => {
-  const [sorter, setSorter] = useState<string>('');
-  const [createModalVisible, handleModalVisible] = useState<boolean>(false);
-  const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
-  const [stepFormValues, setStepFormValues] = useState({});
-  const actionRef = useRef<ActionType>();
-  const columns: ProColumns<TableListItem>[] = [
-    {
-      title: '名称',
-      dataIndex: 'name',
-      rules: [
-        {
-          required: true,
-          message: '规则名称为必填项',
-        },
-      ],
-    },
-    {
-      title: '业务ID',
-      dataIndex: 'desc',
-      valueType: 'textarea',
-    },
-    {
-      title: '系统角色',
-      dataIndex: 'callNo',
-      sorter: true,
-      hideInForm: true,
-      renderText: (val: string) => `${val} 万`,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      hideInForm: true,
-      valueEnum: {
-        0: { text: '关闭', status: 'Default' },
-        1: { text: '运行中', status: 'Processing' },
-        2: { text: '已上线', status: 'Success' },
-        3: { text: '异常', status: 'Error' },
+function useInit(props: BusinessProps) {
+  const { dispatch } = props;
+  useEffect(() => {
+    dispatch({
+      type: 'business/fetch',
+      payload: {
+        count: 8,
       },
-    },
-    {
-      title: '上次调度时间',
-      dataIndex: 'updatedAt',
-      sorter: true,
-      valueType: 'dateTime',
-      hideInForm: true,
-    },
-    {
-      title: '操作',
-      dataIndex: 'option',
-      valueType: 'option',
-      render: (_, record) => (
-        <>
-          <a
-            onClick={() => {
-              handleUpdateModalVisible(true);
-              setStepFormValues(record);
-            }}
-          >
-            配置
-          </a>
-          <Divider type="vertical" />
-          <a href="">订阅警报</a>
-        </>
-      ),
-    },
-  ];
+    });
+  }, []);
+}
+
+function useBusinessModule(props: BusinessProps) {
+  const { dispatch } = props;
+  const [visible, setVisible] = useState(false);
+  const [currentBusiness, setBusiness] = useState<BusinessItemType | undefined>();
+
+  const handleClickSubmit = (data: BusinessItemType) => {
+    dispatch({
+      type: 'business/addOrUpdateBusiness',
+      payload: {
+        id: currentBusiness?.id,
+        ...data,
+      },
+    });
+    message.success('添加成功');
+    setVisible(false);
+    setBusiness(undefined);
+  };
+
+  const handleClickCancel = () => {
+    setVisible(false);
+    setBusiness(undefined);
+  };
+
+  const handleClickAdd = () => {
+    setVisible(true);
+    setBusiness(undefined);
+  };
+
+  const handleClickBusinessItem = (data: BusinessItemType) => {
+    setBusiness(data);
+    setVisible(true);
+  };
+
+  return {
+    visible,
+    currentBusiness,
+    handleClickAdd,
+    handleClickBusinessItem,
+    handleClickSubmit,
+    handleClickCancel,
+  };
+}
+const Business: React.FC<BusinessProps> = props => {
+  useInit(props);
+  const {
+    business: { list },
+    loading,
+  } = props;
+
+  const handleCardClick = (id: string) => {
+    props.dispatch(routerRedux.push(`/business/${id}`));
+  };
+
+  const content = (
+    <div className={styles.pageHeaderContent}>
+      <p>展示业务列表</p>
+      <div className={styles.contentLink}>
+        <a>
+          <img alt="" src="https://gw.alipayobjects.com/zos/rmsportal/MjEImQtenlyueSmVEfUD.svg" />{' '}
+          快速开始
+        </a>
+        <a>
+          <img alt="" src="https://gw.alipayobjects.com/zos/rmsportal/NbuDUAuBlIApFuDvWiND.svg" />{' '}
+          操作流程
+        </a>
+        <a>
+          <img alt="" src="https://gw.alipayobjects.com/zos/rmsportal/ohOEPSYdDTNnyMbGuyLb.svg" />{' '}
+          产品文档
+        </a>
+      </div>
+    </div>
+  );
+
+  const extraContent = (
+    <div className={styles.extraImg}>
+      <img
+        alt="这是一个标题"
+        src="https://gw.alipayobjects.com/zos/rmsportal/RzwpdLnhmvDJToTdfDPe.png"
+      />
+    </div>
+  );
+  const nullData: BusinessItemType = {} as BusinessItemType;
+
+  const {
+    visible,
+    currentBusiness,
+    handleClickAdd,
+    handleClickSubmit,
+    handleClickCancel,
+    handleClickBusinessItem,
+  } = useBusinessModule(props);
 
   return (
-    <PageHeaderWrapper>
-      <ProTable<TableListItem>
-        headerTitle="查询表格"
-        actionRef={actionRef}
-        rowKey="key"
-        onChange={(_, _filter, _sorter) => {
-          const sorterResult = _sorter as SorterResult<TableListItem>;
-          if (sorterResult.field) {
-            setSorter(`${sorterResult.field}_${sorterResult.order}`);
-          }
-        }}
-        params={{
-          sorter,
-        }}
-        toolBarRender={(action, { selectedRows }) => [
-          <Button type="primary" onClick={() => handleModalVisible(true)}>
-            <PlusOutlined /> 新建
-          </Button>,
-          selectedRows && selectedRows.length > 0 && (
-            <Dropdown
-              overlay={
-                <Menu
-                  onClick={async e => {
-                    if (e.key === 'remove') {
-                      await handleRemove(selectedRows);
-                      action.reload();
-                    }
-                  }}
-                  selectedKeys={[]}
-                >
-                  <Menu.Item key="remove">批量删除</Menu.Item>
-                  <Menu.Item key="approval">批量审批</Menu.Item>
-                </Menu>
-              }
-            >
-              <Button>
-                批量操作 <DownOutlined />
-              </Button>
-            </Dropdown>
-          ),
-        ]}
-        tableAlertRender={(selectedRowKeys, selectedRows) => (
-          <div>
-            已选择 <a style={{ fontWeight: 600 }}>{selectedRowKeys.length}</a> 项&nbsp;&nbsp;
-            <span>
-              服务调用次数总计 {selectedRows.reduce((pre, item) => pre + item.callNo, 0)} 万
-            </span>
-          </div>
-        )}
-        request={params => queryRule(params)}
-        columns={columns}
-        rowSelection={{}}
+    <PageHeaderWrapper content={content} extraContent={extraContent}>
+      <div className={styles.cardList}>
+        <List<BusinessItemType>
+          rowKey="id"
+          loading={loading}
+          grid={{ gutter: 24, lg: 3, md: 2, sm: 1, xs: 1 }}
+          dataSource={[nullData, ...list]}
+          renderItem={item => {
+            if (item && item.id) {
+              return (
+                <List.Item key={item.id}>
+                  <Card
+                    hoverable
+                    className={styles.card}
+                    onClick={() => handleCardClick(item.id)}
+                    actions={[
+                      <a key="option1">删除</a>,
+                      <a key="option2" onClick={() => handleClickBusinessItem(item)}>
+                        修改
+                      </a>,
+                    ]}
+                  >
+                    <Card.Meta
+                      avatar={<img alt="" className={styles.cardAvatar} src={item.logo} />}
+                      title={<a>{item.name}</a>}
+                      description={
+                        <Paragraph className={styles.item} ellipsis={{ rows: 3 }}>
+                          {item.describe}
+                        </Paragraph>
+                      }
+                    />
+                  </Card>
+                </List.Item>
+              );
+            }
+            return (
+              <List.Item>
+                <Button type="dashed" className={styles.newButton} onClick={handleClickAdd}>
+                  <PlusOutlined /> 新增产品
+                </Button>
+              </List.Item>
+            );
+          }}
+        />
+      </div>
+      <BusinessModule
+        visible={visible}
+        onOk={handleClickSubmit}
+        onCancel={handleClickCancel}
+        data={currentBusiness}
       />
-      <CreateForm onCancel={() => handleModalVisible(false)} modalVisible={createModalVisible}>
-        <ProTable<TableListItem, TableListItem>
-          onSubmit={async value => {
-            const success = await handleAdd(value);
-            if (success) {
-              handleModalVisible(false);
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
-            }
-          }}
-          rowKey="key"
-          type="form"
-          columns={columns}
-          rowSelection={{}}
-        />
-      </CreateForm>
-      {stepFormValues && Object.keys(stepFormValues).length ? (
-        <UpdateForm
-          onSubmit={async value => {
-            const success = await handleUpdate(value);
-            if (success) {
-              handleModalVisible(false);
-              setStepFormValues({});
-              if (actionRef.current) {
-                actionRef.current.reload();
-              }
-            }
-          }}
-          onCancel={() => {
-            handleUpdateModalVisible(false);
-            setStepFormValues({});
-          }}
-          updateModalVisible={updateModalVisible}
-          values={stepFormValues}
-        />
-      ) : null}
     </PageHeaderWrapper>
   );
 };
 
-export default TableList;
+export default connect(
+  ({
+    business,
+    loading,
+  }: {
+    business: StateType;
+    loading: {
+      models: { [key: string]: boolean };
+    };
+  }) => ({
+    business,
+    loading: loading.models.business,
+  }),
+)(Business);

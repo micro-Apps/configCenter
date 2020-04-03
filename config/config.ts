@@ -99,15 +99,26 @@ export default {
             },
             {
               name: 'business',
-              icon: 'table',
+              icon: 'smile',
               path: '/business',
-              component: './Business',
-            },
-            {
-              name: 'module',
-              icon: 'TagsOutlined',
-              path: '/module',
-              component: './Module',
+              hideChildrenInMenu: true,
+              routes: [
+                {
+                  path: '/business',
+                  component: './Business',
+                  breadcrumbName: '',
+                },
+                {
+                  name: '菜单管理',
+                  path: '/business/:businessId',
+                  component: './Business/SubMenu',
+                },
+                {
+                  name: '配置项管理',
+                  path: '/business/:businessId/:subMenuId',
+                  component: './Business/Options',
+                },
+              ],
             },
             {
               component: './404',
@@ -145,7 +156,7 @@ export default {
         resourcePath: string;
       },
       _: string,
-      localName: string
+      localName: string,
     ) => {
       if (
         context.resourcePath.includes('node_modules') ||

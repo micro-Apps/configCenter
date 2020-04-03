@@ -1,35 +1,13 @@
-export interface TableListItem {
-  key: number;
-  disabled?: boolean;
-  href: string;
+export interface Member {
   avatar: string;
   name: string;
-  owner: string;
-  desc: string;
-  callNo: number;
-  status: number;
-  updatedAt: Date;
-  createdAt: Date;
-  progress: number;
+  id: string;
 }
 
-export interface TableListPagination {
-  total: number;
-  pageSize: number;
-  current: number;
-}
-
-export interface TableListData {
-  list: TableListItem[];
-  pagination: Partial<TableListPagination>;
-}
-
-export interface TableListParams {
-  sorter?: string;
-  status?: string;
-  name?: string;
-  desc?: string;
-  key?: number;
-  pageSize?: number;
-  currentPage?: number;
+export interface BusinessItemType {
+  id: string;
+  logo: string;
+  domain: string;
+  name: string;
+  describe: string;
 }
