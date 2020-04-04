@@ -109,14 +109,32 @@ export default {
                   breadcrumbName: '',
                 },
                 {
-                  name: '菜单管理',
+                  name: 'menu',
                   path: '/business/:businessId',
                   component: './Business/SubMenu',
                 },
                 {
-                  name: '配置项管理',
+                  name: 'config',
                   path: '/business/:businessId/:subMenuId',
                   component: './Business/Options',
+                },
+              ],
+            },
+            {
+              name: 'module',
+              icon: 'smile',
+              path: '/module',
+              hideChildrenInMenu: true,
+              routes: [
+                {
+                  name: 'module',
+                  path: '/module',
+                  component: './Module',
+                },
+                {
+                  name: 'detail',
+                  path: '/module/:moduleId',
+                  component: './Module/ModuleDetail',
                 },
               ],
             },
