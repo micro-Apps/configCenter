@@ -8,7 +8,7 @@
 export default {
   dev: {
     '/api/': {
-      target: 'http://localhost:3000',
+      target: 'http://localhost:9000',
       changeOrigin: false,
       pathRewrite: { '^/api/': '' },
     },
@@ -22,7 +22,7 @@ export default {
   },
   pre: {
     '/api/': {
-      target: 'http://localhost:3000/',
+      target: 'http://localhost:9000/',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
