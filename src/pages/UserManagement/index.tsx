@@ -1,5 +1,4 @@
-import { DownOutlined } from '@ant-design/icons';
-import { Button, Divider, Dropdown, Menu } from 'antd';
+import { Button, Divider, message } from 'antd';
 import React, { useRef, Dispatch, useState, useEffect } from 'react';
 import { PageHeaderWrapper } from '@ant-design/pro-layout';
 import ProTable, { ProColumns, ActionType } from '@ant-design/pro-table';
@@ -9,16 +8,19 @@ import { AnyAction } from 'redux';
 import { ConnectState } from '@/models/connect';
 import { BusinessRole } from '@/models/userManage';
 import { TableListItem } from './data.d';
+import CreateForm from './components/CreateForm';
 import {
   fetchUserList,
   findBusinessAllRole,
   findBusinessUserRole,
   changeUserBusinessRole,
+  registerUser,
 } from './service';
 import ChangeUserRole, { ChangeUserRoleProps } from './components/ChangeUserRole';
 import ChangeUserBusinessAndBusinessRole, {
   BusinessAndBusinessRoleProps,
 } from './components/ChangeUserBusinessAndBusinessRole';
+import Authorized from '@/utils/Authorized';
 
 const mapStateToProps = ({ userManage, loading }: ConnectState) => ({
   roleList: userManage.roleList,
@@ -184,6 +186,36 @@ function useChangeUserBusinessRole(props: TableListProps): UserChangeUserBusines
   };
 }
 
+export interface RegisterUser {
+  username: string;
+  password: string;
+  repeatPassword: string;
+}
+
+function useRegisterModule() {
+  const [visible, setVisible] = useState(false);
+  const handleRegisterUserSubmit = async (params: RegisterUser) => {
+    await registerUser(params);
+    message.success('添加成功');
+    setVisible(false);
+  };
+
+  const handleRegisterCancel = () => {
+    setVisible(false);
+  };
+
+  const handleClickRegisterAdd = () => {
+    setVisible(true);
+  };
+
+  return {
+    visible,
+    handleRegisterUserSubmit,
+    handleRegisterCancel,
+    handleClickRegisterAdd,
+  };
+}
+
 const TableList: React.FC<TableListProps> = props => {
   const actionRef = useRef<ActionType>();
   const {
@@ -196,6 +228,13 @@ const TableList: React.FC<TableListProps> = props => {
     handleChangeRoleId,
     loading,
   } = useChangeUserRole(props);
+
+  const {
+    visible: registerVisible,
+    handleRegisterCancel,
+    handleRegisterUserSubmit,
+    handleClickRegisterAdd,
+  } = useRegisterModule();
 
   const {
     visible: changeUserBusinessAndBusinessRoleVisible,
@@ -228,8 +267,10 @@ const TableList: React.FC<TableListProps> = props => {
       valueType: 'option',
       render: (_, record) => (
         <>
-          <a onClick={() => onClickChangeUserRole(record)}>修改系统角色</a>
-          <Divider type="vertical" />
+          <Authorized authority={['ADMIN']} noMatch={<></>}>
+            <a onClick={() => onClickChangeUserRole(record)}>修改系统角色</a>
+            <Divider type="vertical" />
+          </Authorized>
           <a onClick={() => handleClickUser(record)}>设置业务角色</a>
         </>
       ),
@@ -242,24 +283,18 @@ const TableList: React.FC<TableListProps> = props => {
         headerTitle="用户列表"
         actionRef={actionRef}
         rowKey="key"
-        toolBarRender={(action, { selectedRows }) => [
-          selectedRows && selectedRows.length > 0 && (
-            <Dropdown
-              overlay={
-                <Menu selectedKeys={[]}>
-                  <Menu.Item key="remove">批量分配业务</Menu.Item>
-                </Menu>
-              }
-            >
-              <Button>
-                批量操作
-                <DownOutlined />
-              </Button>
-            </Dropdown>
-          ),
+        toolBarRender={() => [
+          <Button type="primary" onClick={handleClickRegisterAdd}>
+            新增
+          </Button>,
         ]}
         request={params => fetchUserList(params)}
         columns={columns}
+      />
+      <CreateForm
+        modalVisible={registerVisible}
+        onSubmit={handleRegisterUserSubmit}
+        onCancel={handleRegisterCancel}
       />
       <ChangeUserRole
         visible={visible}

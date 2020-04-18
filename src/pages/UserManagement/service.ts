@@ -36,9 +36,23 @@ interface ChangeUserBusinessRoleDto {
   businessRoleIds: string[];
   status: string;
 }
+
 export async function changeUserBusinessRole(param: ChangeUserBusinessRoleDto) {
   return request('/api/user/changeUserBusinessRole', {
     method: 'POST',
     data: param,
+  });
+}
+
+export interface RegisterUser {
+  username: string;
+  password: string;
+  repeatPassword: string;
+}
+
+export function registerUser(params: RegisterUser) {
+  return request('/api/auth/register', {
+    method: 'POST',
+    data: params,
   });
 }

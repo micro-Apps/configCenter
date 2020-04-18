@@ -5,6 +5,7 @@
 import { extend } from 'umi-request';
 import { notification } from 'antd';
 import { getUserInfo } from './authority';
+import { router } from 'umi';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -37,6 +38,9 @@ const errorHandler = (error: { response: Response }): Response => {
       message: `请求错误 ${status}: ${url}`,
       description: errorText,
     });
+    if (response.status === 401) {
+      router.push(`/user/login?redirect=${window.location.href}`);
+    }
   } else if (!response) {
     notification.error({
       description: '您的网络发生异常，无法连接服务器',
@@ -46,15 +50,24 @@ const errorHandler = (error: { response: Response }): Response => {
   return response;
 };
 
+function getRequest() {
+  return extend({
+    errorHandler, // 默认错误处理
+    credentials: 'include', // 默认请求是否带上cookie
+    headers: {
+      Authorization: getUserInfo().token,
+    },
+  });
+}
+
 /**
  * 配置request请求时的默认参数
  */
-const request = extend({
-  errorHandler, // 默认错误处理
-  credentials: 'include', // 默认请求是否带上cookie
-  headers: {
-    Authorization: getUserInfo().token,
-  }
-});
+// eslint-disable-next-line import/no-mutable-exports
+let request = getRequest();
+
+export function updateRequest() {
+  request = getRequest();
+}
 
 export default request;

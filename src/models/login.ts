@@ -4,7 +4,7 @@ import { stringify } from 'querystring';
 import { router } from 'umi';
 
 import { fakeAccountLogin } from '@/services/login';
-import { setAuthority, UserInfo, setUserInfo } from '@/utils/authority';
+import { setAuthority, setUserInfo } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 
 export interface StateType {

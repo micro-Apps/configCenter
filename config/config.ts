@@ -85,7 +85,6 @@ export default {
         {
           path: '/',
           component: '../layouts/BasicLayout',
-          authority: ['admin', 'user'],
           routes: [
             {
               path: '/',
@@ -93,12 +92,14 @@ export default {
             },
             {
               name: 'user.mange',
+              authority: ['ADMIN', 'OPERATION', 'BUSINESS'],
               icon: 'UserOutlined',
               path: '/user-management',
               component: './UserManagement',
             },
             {
               name: 'business',
+              authority: ['ADMIN', 'OPERATION', 'BUSINESS'],
               icon: 'smile',
               path: '/business',
               hideChildrenInMenu: true,
@@ -122,6 +123,7 @@ export default {
             },
             {
               name: 'module',
+              authority: ['ADMIN', 'DEVELOPMENT'],
               icon: 'smile',
               path: '/module',
               hideChildrenInMenu: true,

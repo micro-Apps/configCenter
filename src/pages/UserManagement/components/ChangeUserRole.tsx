@@ -40,7 +40,7 @@ const ChangeUserRole: React.FC<ChangeUserRoleProps> = props => {
 
   return (
     <Modal
-      title="修改用户角色"
+      title="选择用户角色"
       visible={visible}
       onOk={handleSubmit}
       onCancel={handleCancel}
