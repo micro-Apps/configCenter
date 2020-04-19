@@ -6,6 +6,7 @@ import { connect } from 'dva';
 import { find } from 'lodash';
 import { AnyAction } from 'redux';
 import { ConnectState } from '@/models/connect';
+import Authorized from '@/utils/Authorized';
 import { BusinessRole } from '@/models/userManage';
 import { TableListItem } from './data.d';
 import CreateForm from './components/CreateForm';
@@ -20,7 +21,6 @@ import ChangeUserRole, { ChangeUserRoleProps } from './components/ChangeUserRole
 import ChangeUserBusinessAndBusinessRole, {
   BusinessAndBusinessRoleProps,
 } from './components/ChangeUserBusinessAndBusinessRole';
-import Authorized from '@/utils/Authorized';
 
 const mapStateToProps = ({ userManage, loading }: ConnectState) => ({
   roleList: userManage.roleList,
@@ -172,7 +172,6 @@ function useChangeUserBusinessRole(props: TableListProps): UserChangeUserBusines
       status: 'add',
     });
   };
-
   return {
     visible,
     allBusinessList: props.allBusinessList,
@@ -305,9 +304,7 @@ const TableList: React.FC<TableListProps> = props => {
         roleList={roleList}
         loading={loading}
       />
-      {currentUserBusinessList &&
-      currentUserBusinessList.length &&
-      changeUserBusinessAndBusinessRoleVisible ? (
+      {currentUserBusinessList && changeUserBusinessAndBusinessRoleVisible ? (
         <ChangeUserBusinessAndBusinessRole
           allBusinessList={allBusinessList}
           currentUserBusinessList={currentUserBusinessList}

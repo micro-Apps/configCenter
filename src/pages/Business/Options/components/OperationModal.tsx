@@ -11,7 +11,7 @@ interface OperationModalProps {
   visible: boolean;
   state: StateType;
   current?: Partial<BasicListItemDataType>;
-  onSubmit: (values: BasicListItemDataType) => void;
+  onSubmit: (values: Partial<BasicListItemDataType>) => void;
   onCancel: () => void;
 }
 
@@ -88,6 +88,7 @@ const OperationModal: FC<OperationModalProps> = props => {
 
     const moduleInfo = find(moduleList, { id: moduleId });
     const moduleVersionInfo = find(moduleInfo?.version, { version: moduleVersion });
+    if (!moduleInfo || !moduleVersionInfo) return;
     const roleInfo = roleList?.filter(item => roleIdList.includes(item.id));
 
     if (onSubmit) {
@@ -103,9 +104,7 @@ const OperationModal: FC<OperationModalProps> = props => {
     }
   };
 
-  const modalFooter = current
-    ? { footer: null, onCancel }
-    : { okText: '保存', onOk: handleSubmit, onCancel };
+  const modalFooter = { okText: '保存', onOk: handleSubmit, onCancel };
 
   const getModalContent = () => (
     <Form {...formLayout} form={form} onFinish={handleFinish}>

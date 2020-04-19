@@ -31,7 +31,7 @@ const BusinessModule: React.FC<BusinessModuleProps> = props => {
         <Form.Item name="name" label="名称" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
-        <Form.Item name="logo" label="品logo" rules={[{ required: true }]}>
+        <Form.Item name="logo" label="品牌logo" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
         <Form.Item name="describe" label="描述" rules={[{ required: true }]}>

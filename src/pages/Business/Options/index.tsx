@@ -128,13 +128,13 @@ export const Options: FC<OptionsProps> = props => {
           <Card bordered={false}>
             <Row>
               <Col sm={8} xs={24}>
-                <Info title="角色数" value="8个角色" bordered />
+                <Info title="角色数" value="12个角色" bordered />
               </Col>
               <Col sm={8} xs={24}>
                 <Info title="子菜单" value="12个子菜单" bordered />
               </Col>
               <Col sm={8} xs={24}>
-                <Info title="选项数" value="24个选项" />
+                <Info title="当前菜单项" value="24个选项" />
               </Col>
             </Row>
           </Card>

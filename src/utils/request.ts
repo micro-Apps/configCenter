@@ -63,11 +63,10 @@ function getRequest() {
 /**
  * 配置request请求时的默认参数
  */
-// eslint-disable-next-line import/no-mutable-exports
-let request = getRequest();
-
-export function updateRequest() {
-  request = getRequest();
-}
+// TODO: 类型补全
+const request = (...params: any) => {
+  const req = getRequest();
+  return req(...params);
+};
 
 export default request;

@@ -89,11 +89,11 @@ const TableList: React.FC<TableListProps> = props => {
       dataIndex: 'title',
     },
     {
-      title: '菜单键值',
+      title: '菜单key',
       dataIndex: 'key',
     },
     {
-      title: '业务id',
+      title: '菜单id',
       dataIndex: 'businessId',
     },
     {

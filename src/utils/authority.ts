@@ -1,5 +1,4 @@
 import { reloadAuthorized } from './Authorized';
-import { updateRequest } from './request';
 
 // use localStorage to store the authority info, which might be sent from server in actual project.
 export function getAuthority(str?: string): string | string[] {
@@ -42,7 +41,6 @@ export interface UserInfo {
 
 export function setUserInfo(data: UserInfo): void {
   localStorage.setItem('userInfo', JSON.stringify(data));
-  updateRequest();
 }
 
 export function getUserInfo(): UserInfo {
